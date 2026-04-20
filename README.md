@@ -2,6 +2,8 @@
 
 A live crypto price tracker built with **SvelteKit + TypeScript + Vite**, powered by the free [CoinGecko API](https://www.coingecko.com/en/api/documentation) (no API key required).
 
+🌐 **Live demo:** https://svelte-from-zero.vercel.app
+
 ## Quick Start
 
 ```bash
