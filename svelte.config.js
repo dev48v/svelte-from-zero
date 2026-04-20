@@ -1,13 +1,16 @@
-// STEP 1: SvelteKit configuration.
-// adapter-auto picks the correct adapter at build time (Vercel, Netlify, Node, etc.)
-// vitePreprocess lets us write <script lang="ts"> inside .svelte files.
-import adapter from '@sveltejs/adapter-auto';
+// STEP 8: Swap adapter-auto for the explicit Vercel adapter.
+// Pinning the adapter guarantees the same build behaviour on CI/Vercel as
+// on localhost; adapter-auto warns when it cannot detect a host. runtime
+// 'nodejs20.x' matches Vercel's current LTS Node image.
+import adapter from '@sveltejs/adapter-vercel';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 const config = {
   preprocess: vitePreprocess(),
   kit: {
-    adapter: adapter()
+    adapter: adapter({
+      runtime: 'nodejs20.x'
+    })
   }
 };
 
