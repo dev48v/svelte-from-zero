@@ -1,17 +1,18 @@
-// STEP 6: Load function for the dynamic /coin/[id] route.
-// `params.id` is provided by the folder name `[id]` in the route path.
-// We throw SvelteKit's `error(404)` when CoinGecko returns a 404 so users
-// see a proper Not Found page instead of a blank crash.
+// STEP 7: Load function now also fetches the 7-day market chart in parallel.
+// Promise.all keeps the two requests concurrent instead of waterfalling,
+// so the page resolves roughly as fast as the slower of the two calls.
 import { error } from '@sveltejs/kit';
-import { getCoin } from '$lib/api';
+import { getCoin, getCoinChart } from '$lib/api';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch }) => {
   try {
-    const coin = await getCoin(params.id, fetch);
-    return { coin };
+    const [coin, chart] = await Promise.all([
+      getCoin(params.id, fetch),
+      getCoinChart(params.id, 7, fetch)
+    ]);
+    return { coin, chart };
   } catch (e) {
-    // getCoin throws with the original HTTP status baked into the message.
     if (e instanceof Error && e.message.includes(' 404 ')) {
       throw error(404, `Coin "${params.id}" not found on CoinGecko.`);
     }

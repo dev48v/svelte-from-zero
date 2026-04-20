@@ -4,11 +4,16 @@
      volume, and the coin's description. The 7-day chart arrives in STEP 7. -->
 <script lang="ts">
   import { formatPrice, formatBigUsd, formatCompact, formatPct } from '$lib/format';
+  import Sparkline from '$lib/components/Sparkline.svelte';
   import type { PageData } from './$types';
 
   export let data: PageData;
   $: coin = data.coin;
   $: md = coin.market_data;
+  $: chart = data.chart;
+  // STEP 7: colour the sparkline green or red based on the 7-day change so
+  // the chart's visual tone agrees with the headline percentage below it.
+  $: sparkColour = md.price_change_percentage_7d >= 0 ? 'var(--green)' : 'var(--red)';
 
   // Strip HTML from the CoinGecko description — they occasionally embed <a> tags.
   // A textarea trick is the shortest XSS-safe HTML strip in the browser.
@@ -56,6 +61,16 @@
     </div>
   </div>
 </header>
+
+<section class="card chart-card">
+  <div class="chart-head">
+    <h2>7-day price</h2>
+    <span class="chart-change {md.price_change_percentage_7d >= 0 ? 'text-green' : 'text-red'}">
+      {formatPct(md.price_change_percentage_7d)}
+    </span>
+  </div>
+  <Sparkline prices={chart.prices} stroke={sparkColour} />
+</section>
 
 <section class="card stats">
   <div class="stat">
@@ -189,6 +204,27 @@
     color: var(--text-muted);
     font-weight: 400;
     margin-left: 0.25rem;
+  }
+  .chart-card {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .chart-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.75rem;
+  }
+  .chart-head h2 {
+    margin: 0;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .chart-change {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
   }
   .stats {
     display: grid;
