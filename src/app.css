@@ -1,0 +1,22 @@
+/* STEP 1: Minimal CSS reset + base styles.
+   We'll replace the body colors and typography in STEP 2 when Tailwind-like
+   utility classes arrive. Keeping this file small for now so the scaffold
+   step is clean and reviewable. */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
