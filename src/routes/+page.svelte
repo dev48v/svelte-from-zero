@@ -1,11 +1,25 @@
-<!-- STEP 4: Home page — renders the top 50 coins table.
-     Data arrives pre-fetched from +page.ts via the `data` prop, so the
-     first paint already has coins. Search + sparkline come in later steps. -->
+<!-- STEP 5: Home page with client-side search.
+     All 50 coins are already in memory (fetched once by the load function),
+     so filtering is pure JavaScript — no extra API call per keystroke. The
+     reactive `$:` block recomputes `filtered` whenever `query` or
+     `data.coins` changes. -->
 <script lang="ts">
   import CoinRow from '$lib/components/CoinRow.svelte';
+  import SearchBox from '$lib/components/SearchBox.svelte';
   import type { PageData } from './$types';
 
   export let data: PageData;
+
+  let query = '';
+
+  // Normalise once per keystroke — match on coin name OR ticker symbol.
+  // Case-insensitive; whitespace-only queries fall through to "show all".
+  $: needle = query.trim().toLowerCase();
+  $: filtered = needle
+    ? data.coins.filter(
+        (c) => c.name.toLowerCase().includes(needle) || c.symbol.toLowerCase().includes(needle)
+      )
+    : data.coins;
 </script>
 
 <svelte:head>
@@ -21,6 +35,11 @@
   </p>
 </section>
 
+<div class="toolbar">
+  <SearchBox bind:value={query} />
+  <span class="count">{filtered.length} of {data.coins.length}</span>
+</div>
+
 <div class="card table">
   <div class="header-row">
     <span>#</span>
@@ -30,14 +49,16 @@
     <span class="num cap">Market Cap</span>
     <span class="num vol">Volume</span>
   </div>
-  {#each data.coins as coin (coin.id)}
+  {#each filtered as coin (coin.id)}
     <CoinRow {coin} />
+  {:else}
+    <p class="empty">No coins match "{query}". Try a different name or ticker.</p>
   {/each}
 </div>
 
 <style>
   .hero {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
   h1 {
     margin: 0 0 0.5rem;
@@ -52,6 +73,21 @@
   }
   .lede a {
     color: var(--accent);
+  }
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .toolbar :global(.search) {
+    flex: 1;
+    max-width: 420px;
+  }
+  .count {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
   }
   .table {
     overflow: hidden;
@@ -70,6 +106,12 @@
   }
   .num {
     text-align: right;
+  }
+  .empty {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    margin: 0;
   }
   @media (max-width: 720px) {
     .header-row {
